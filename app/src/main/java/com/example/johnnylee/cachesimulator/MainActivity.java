@@ -11,9 +11,13 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ListView;
 import android.widget.Toast;
 
 import com.example.johnnylee.cachesimulator.dto.Config;
+import com.example.johnnylee.cachesimulator.model.Line;
+import com.example.johnnylee.cachesimulator.model.memory.Cache;
+import com.example.johnnylee.cachesimulator.model.memory.Main;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
@@ -24,7 +28,10 @@ public class MainActivity extends AppCompatActivity {
     
     private static final int RESULT_CONFIG_FILE = 0;
     public static Config configGlobal;
-    
+    private Main mainMemory;
+    private Cache cacheMemory;
+    private ListView listView;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -48,7 +55,25 @@ public class MainActivity extends AppCompatActivity {
                         .setAction("Action", null).show();
             }
         });
+        listView = (ListView) findViewById(R.id.listMemories);
+    }
 
+    private String[] printCurrentMemoryStatus(int linesCount){
+        String[] memoryListing = new  String[linesCount];
+        StringBuilder sCache = new StringBuilder("Cache Memory: \n");
+        for(int i = 0; i < linesCount; i++){
+            Line line = cacheMemory.getLineAtPosition(i);
+            memoryListing = new String[cacheMemory.getLineAmount()];
+            sCache.append(line.getId()).append("-")
+                    .append(line.getBlock().getId())
+                    .append("-");
+            for(int j = 0; i < cacheMemory.getLineAtPosition(i).getBlock().getWords().length; j++){
+                sCache.append(cacheMemory.getLineAtPosition(i).getBlock().getWordAtPosition(j).getAdress())
+                        .append("-").append(cacheMemory.getLineAtPosition(i).getBlock().getWordAtPosition(j).getContent()+"\n");
+            }
+            memoryListing[i] = sCache.toString();
+        }
+        return memoryListing;
     }
 
     private Config readConfig(Uri dataUri) throws IOException {
@@ -66,12 +91,24 @@ public class MainActivity extends AppCompatActivity {
         return config;
     }
 
+    private void initMemories(){
+        cacheMemory = new Cache(configGlobal.getBlockSize(), false, false, 0, configGlobal.getCacheLineSize());
+        mainMemory = new Main(configGlobal.getBlockSize(), false, false, 0);
+//        for (int i = 0; i < cacheMemory.getLineAmount(); i++)
+//            cacheMemory.getLineAtPosition(i).getBlock().setWordAt(i, "0");
+//        for (int i = 0; i < mainMemory.getBlockAmount(); i++)
+//            mainMemory.getBlockAtPosition(i).setWordAt(i, "0");
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        switch (resultCode){
+        switch (requestCode){
             case RESULT_CONFIG_FILE:
                 try {
                     configGlobal = readConfig(data.getData());
+                    initMemories();
+                    String[] lines = printCurrentMemoryStatus(cacheMemory.getLineAmount());
+
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
