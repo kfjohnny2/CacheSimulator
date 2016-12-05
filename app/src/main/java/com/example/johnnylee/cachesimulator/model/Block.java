@@ -1,5 +1,7 @@
 package com.example.johnnylee.cachesimulator.model;
 
+import com.example.johnnylee.cachesimulator.dto.Config;
+
 /**
  * Created by johnnylee on 02/12/16.
  */
@@ -13,11 +15,9 @@ public class Block {
         id++;
     }
 
-    public Block(int blockSize) {
-        this.blockSize = blockSize;
+    public Block(Config config) {
+        this.blockSize = config.getBlockSize();
         this.words = new Word[blockSize];
-        for(int i = 0; i < blockSize; i++)
-            words[i] = new Word(0, 0);
     }
 
     public static int getId() {
@@ -44,7 +44,7 @@ public class Block {
         this.words = words;
     }
 
-    public void setWordAt(int pos, int value){
+    public void setWordAt(int pos, String value){
         this.words[pos].setContent(value);
     }
 
