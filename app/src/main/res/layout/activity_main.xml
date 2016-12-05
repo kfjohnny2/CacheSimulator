@@ -2,6 +2,7 @@
 <android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:fab="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
@@ -23,11 +24,44 @@
 
     <include layout="@layout/content_main" />
 
-    <com.getbase.floatingactionbutton.FloatingActionsMenu
-        android:id="@+id/fab"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:layout_margin="@dimen/fab_margin" />
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <com.getbase.floatingactionbutton.FloatingActionsMenu
+            android:id="@+id/fab"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
+            fab:fab_addButtonColorNormal="@color/colorPrimary"
+            fab:fab_addButtonColorPressed="@color/colorPrimaryDark"
+            fab:fab_addButtonPlusIconColor="@android:color/white"
+            android:layout_marginBottom="16dp"
+            android:layout_marginRight="16dp"
+            android:layout_marginEnd="16dp">
+
+            <com.getbase.floatingactionbutton.FloatingActionButton
+                android:id="@+id/fab_oferecer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                fab:fab_colorNormal="@android:color/white"
+                fab:fab_title="Oferecer carona"
+                fab:fab_icon="@drawable/ic_action_read"
+                fab:fab_colorPressed="@android:color/white"/>
+
+            <com.getbase.floatingactionbutton.FloatingActionButton
+                android:id="@+id/fab_solicitar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                fab:fab_colorNormal="@android:color/white"
+                fab:fab_title="Solicitar carona"
+                fab:fab_icon="@drawable/ic_action_write"
+                fab:fab_colorPressed="@android:color/white"/>
+
+        </com.getbase.floatingactionbutton.FloatingActionsMenu>
+
+    </RelativeLayout>
 
 </android.support.design.widget.CoordinatorLayout>

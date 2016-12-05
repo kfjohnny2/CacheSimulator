@@ -1,17 +1,23 @@
 package com.example.johnnylee.cachesimulator;
 
+import android.Manifest;
 import android.app.Dialog;
 import android.content.ActivityNotFoundException;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.res.AssetManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.InputType;
+import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -26,18 +32,19 @@ import com.example.johnnylee.cachesimulator.dto.commands.Write;
 import com.example.johnnylee.cachesimulator.model.memory.Cache;
 import com.example.johnnylee.cachesimulator.model.memory.Main;
 import com.getbase.floatingactionbutton.AddFloatingActionButton;
+import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 
 public class MainActivity extends AppCompatActivity {
 
     private static final int RESULT_CONFIG_FILE = 0;
     public static Config configGlobal;
-    private Main mainMemory;
-    private Cache cacheMemory;
+    private static final String TAG = "MainActivity";
     private EditText edLog;
     private Dialog dialog;
     private Wrapper wrapper;
@@ -48,7 +55,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
+        grantStoragePermission();
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
         intent.setType("text/plain");
         intent.addCategory(Intent.CATEGORY_OPENABLE);
@@ -57,16 +64,15 @@ public class MainActivity extends AppCompatActivity {
         } catch (ActivityNotFoundException e) {
             Toast.makeText(getApplicationContext(), "No file manager found", Toast.LENGTH_LONG).show();
         }
-
         edLog = (EditText) findViewById(R.id.edmLog);
-//        cacheMemory.write();
-        FloatingActionsMenu fab = (FloatingActionsMenu) findViewById(R.id.fab);
-        fab.addButton(new AddFloatingActionButton(getApplicationContext()));
-        fab.addButton(new AddFloatingActionButton(getApplicationContext()));
-        View fabRead = fab.getChildAt(0);
-        View fabWrite = fab.getChildAt(1);
-        fabRead.setBackgroundResource(R.drawable.ic_action_read);
-        fabWrite.setBackgroundResource(R.drawable.ic_action_write);
+        FloatingActionButton fabRead = (com.getbase.floatingactionbutton.FloatingActionButton) findViewById(R.id.fab_solicitar);
+        FloatingActionButton fabWrite = (com.getbase.floatingactionbutton.FloatingActionButton) findViewById(R.id.fab_oferecer);
+//        FloatingActionsMenu fab = (FloatingActionsMenu) findViewById(R.id.fab);
+//        fab.addButton(new AddFloatingActionButton(getApplicationContext()));
+//        fab.addButton(new AddFloatingActionButton(getApplicationContext()));
+//        fabRead.setBackgroundResource(R.drawable.ic_action_read);
+//        fabWrite.setBackgroundResource(R.drawable.ic_action_write);
+
         fabRead.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -108,7 +114,8 @@ public class MainActivity extends AppCompatActivity {
                 dialog.show();
             }
         });
-
+        FloatingActionsMenu fab = (FloatingActionsMenu) findViewById(R.id.fab);
+        fab.setEnabled(true);
     }
 
     private Config readConfig(Uri dataUri) throws IOException {
@@ -174,5 +181,25 @@ public class MainActivity extends AppCompatActivity {
     public void onBackPressed() {
         super.onBackPressed();
 
+    }
+
+    public boolean grantStoragePermission() {
+        if (Build.VERSION.SDK_INT >= 23 && checkSelfPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            Log.v(TAG, "Permission is revoked");
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
+            return false;
+        }
+
+        // permission is automatically granted on sdk < 23 upon installation
+        Log.v(TAG, "Permission is granted");
+        return true;
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            Log.v(TAG, "Permission: " + permissions[0] + " was " + grantResults[0]);
+        }
     }
 }
