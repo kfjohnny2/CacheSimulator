@@ -1,36 +1,46 @@
 package com.example.johnnylee.cachesimulator;
 
+import android.app.Dialog;
 import android.content.ActivityNotFoundException;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.InputType;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.ListView;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import com.example.johnnylee.cachesimulator.dto.Config;
-import com.example.johnnylee.cachesimulator.model.Line;
+import com.example.johnnylee.cachesimulator.dto.Wrapper;
+import com.example.johnnylee.cachesimulator.dto.commands.Read;
+import com.example.johnnylee.cachesimulator.dto.commands.Write;
 import com.example.johnnylee.cachesimulator.model.memory.Cache;
 import com.example.johnnylee.cachesimulator.model.memory.Main;
+import com.getbase.floatingactionbutton.AddFloatingActionButton;
+import com.getbase.floatingactionbutton.FloatingActionsMenu;
 
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 
 public class MainActivity extends AppCompatActivity {
-    
+
     private static final int RESULT_CONFIG_FILE = 0;
     public static Config configGlobal;
     private Main mainMemory;
     private Cache cacheMemory;
-    private ListView listView;
+    private EditText edLog;
+    private Dialog dialog;
+    private Wrapper wrapper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,67 +57,89 @@ public class MainActivity extends AppCompatActivity {
         } catch (ActivityNotFoundException e) {
             Toast.makeText(getApplicationContext(), "No file manager found", Toast.LENGTH_LONG).show();
         }
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
+
+        edLog = (EditText) findViewById(R.id.edmLog);
+//        cacheMemory.write();
+        FloatingActionsMenu fab = (FloatingActionsMenu) findViewById(R.id.fab);
+        fab.addButton(new AddFloatingActionButton(getApplicationContext()));
+        fab.addButton(new AddFloatingActionButton(getApplicationContext()));
+        View fabRead = fab.getChildAt(0);
+        View fabWrite = fab.getChildAt(1);
+        fabRead.setBackgroundResource(R.drawable.ic_action_read);
+        fabWrite.setBackgroundResource(R.drawable.ic_action_write);
+        fabRead.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+                dialog = new Dialog(MainActivity.this);
+                dialog.setTitle("READ MEMORY");
+                dialog.setContentView(R.layout.dialog_read_memory);
+                Button btCreate = (Button) dialog.findViewById(R.id.btRead);
+                final EditText edAdress = (EditText) dialog.findViewById(R.id.edAdress);
+                final EditText edValue = (EditText) dialog.findViewById(R.id.edValue);
+                edValue.setVisibility(View.GONE);
+                btCreate.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        edLog.setText("");
+                        edLog.setText(wrapper.read(new Read(Integer.parseInt(edAdress.getText().toString()))));
+                    }
+                });
+                dialog.show();
             }
         });
-        listView = (ListView) findViewById(R.id.listMemories);
-    }
-
-    private String[] printCurrentMemoryStatus(int linesCount){
-        String[] memoryListing = new  String[linesCount];
-        StringBuilder sCache = new StringBuilder("Cache Memory: \n");
-        for(int i = 0; i < linesCount; i++){
-            Line line = cacheMemory.getLineAtPosition(i);
-            memoryListing = new String[cacheMemory.getLineAmount()];
-            sCache.append(line.getId()).append("-")
-                    .append(line.getBlock().getId())
-                    .append("-");
-            for(int j = 0; i < cacheMemory.getLineAtPosition(i).getBlock().getWords().length; j++){
-                sCache.append(cacheMemory.getLineAtPosition(i).getBlock().getWordAtPosition(j).getAdress())
-                        .append("-").append(cacheMemory.getLineAtPosition(i).getBlock().getWordAtPosition(j).getContent()+"\n");
+        fabWrite.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dialog = new Dialog(MainActivity.this);
+                dialog.setTitle("WRITE MEMORY");
+                dialog.setContentView(R.layout.dialog_read_memory);
+                Button btCreate = (Button) dialog.findViewById(R.id.btRead);
+                final EditText edAdress = (EditText) dialog.findViewById(R.id.edAdress);
+                final EditText edValue = (EditText) dialog.findViewById(R.id.edValue);
+                btCreate.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        wrapper.write(new Write(Integer.parseInt(edAdress.getText().toString()),
+                                edValue.getText().toString()));
+                        edLog.setText("");
+                        edLog.setText(wrapper.show());
+                    }
+                });
+                dialog.show();
             }
-            memoryListing[i] = sCache.toString();
-        }
-        return memoryListing;
+        });
+
     }
 
     private Config readConfig(Uri dataUri) throws IOException {
         FileReader fw = new FileReader(dataUri.getPath());
         BufferedReader in = new BufferedReader(fw);
-        String line ;
+        String line;
         int i = 0;
         int[] configInfo = new int[7];
-        while((line = in.readLine()) != null && i < 6) {
+        while ((line = in.readLine()) != null && i < 7) {
             configInfo[i] = Integer.parseInt(line);
             i++;
         }
         in.close();
-        Config config = new Config(configInfo[0], configInfo[1], configInfo[2], configInfo[3], configInfo[4], configInfo[5], configInfo[6]);
-        return config;
+        return new Config(configInfo[0], configInfo[1], configInfo[2], configInfo[3], configInfo[4], configInfo[5], configInfo[6]);
     }
 
-    private void initMemories(){
-        cacheMemory = new Cache(configGlobal.getBlockSize(), false, false, 0, configGlobal.getCacheLineSize());
-        mainMemory = new Main(configGlobal.getBlockSize(), false, false, 0);
-//        for (int i = 0; i < cacheMemory.getLineAmount(); i++)
-//            cacheMemory.getLineAtPosition(i).getBlock().setWordAt(i, "0");
-//        for (int i = 0; i < mainMemory.getBlockAmount(); i++)
-//            mainMemory.getBlockAtPosition(i).setWordAt(i, "0");
+    private void initMemories() {
+        wrapper = new Wrapper(configGlobal);
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        switch (requestCode){
+        switch (requestCode) {
             case RESULT_CONFIG_FILE:
                 try {
                     configGlobal = readConfig(data.getData());
                     initMemories();
-                    String[] lines = printCurrentMemoryStatus(cacheMemory.getLineAmount());
+                    edLog.setText("");
+                    edLog.setText(wrapper.show());
+//                    edLog.setText(printCurrentMemoryStatus());
+//                    String[] lines = printCurrentMemoryStatus(cacheMemory.getLineAmount());
 
                 } catch (IOException e) {
                     e.printStackTrace();

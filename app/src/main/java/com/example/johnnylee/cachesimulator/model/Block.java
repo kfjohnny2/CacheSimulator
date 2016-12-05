@@ -18,6 +18,9 @@ public class Block {
     public Block(Config config) {
         this.blockSize = config.getBlockSize();
         this.words = new Word[blockSize];
+        for (int i = 0; i < blockSize; i++) {
+            words[i] = new Word();
+        }
     }
 
     public static int getId() {
@@ -44,16 +47,11 @@ public class Block {
         this.words = words;
     }
 
-    public void setWordAt(int pos, String value){
+    public void setWordAt(int pos, String value) {
         this.words[pos].setContent(value);
     }
 
-    public Word getWordAtPosition(int pos){
-        Word word;
-        if(pos < blockSize  && pos > 0)
-            word = this.words[pos];
-        else
-            word = null;
-        return word;
+    public Word getWordAtPosition(int pos) {
+        return this.words[pos];
     }
 }

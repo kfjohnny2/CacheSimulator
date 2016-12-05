@@ -8,18 +8,19 @@ import com.example.johnnylee.cachesimulator.model.Word;
  * Created by johnnylee on 03/12/16.
  */
 
-public class Main extends Memory{
+public class Main extends Memory {
     private Config config;
     private Block[] blocks;
 
     public Main(Config config) {
         super(config.getBlockMainMemorySize());
+        this.config = config;
         this.blocks = new Block[config.getBlockMainMemorySize()];
     }
 
-    public Block getBlockAtPosition(int pos){
+    public Block getBlockAtPosition(int pos) {
         Block block;
-        if(pos < getBlockAmount() && pos > 0)
+        if (pos < getBlockAmount() && pos > 0)
             block = this.blocks[pos];
         else
             block = null;
@@ -34,8 +35,8 @@ public class Main extends Memory{
         this.blocks = blocks;
     }
 
-    public void setBlockAtPosition(int adress, Block block){
-            blocks[adress] = block;
+    public void setBlockAtPosition(int adress, Block block) {
+        blocks[adress] = block;
     }
 
     public void write(int wordAdr, String value) {
@@ -54,26 +55,26 @@ public class Main extends Memory{
     }
 
     public String show() {
-        StringBuilder sb = new StringBuilder("\n::: Memória Principal :::\n");
-        sb.append("Conteúdos da memória: ");
+        StringBuilder sb = new StringBuilder("\nMain Memory\n");
+        sb.append("Memory content: ");
 
         for (Block b : blocks) {
             if (b == null) {
-                sb.append("[] ");
+                sb.append("{} ");
             } else if (b.getWords() == null) {
-                sb.append("[]");
+                sb.append("{}");
             } else {
-                sb.append("[");
+                sb.append("{");
                 for (Word w : b.getWords()) {
                     if (w == null) {
-                        sb.append("<>");
+                        sb.append("[]");
                     } else if (w.getContent() == null) {
-                        sb.append("<>");
+                        sb.append("[]");
                     } else {
-                        sb.append("<" + w.getContent()+ ">");
+                        sb.append("[" + w.getContent() + "]");
                     }
                 }
-                sb.append("]");
+                sb.append("}");
             }
         }
         return sb.toString();

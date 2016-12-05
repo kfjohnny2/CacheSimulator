@@ -5,24 +5,24 @@ package com.example.johnnylee.cachesimulator.model;
  */
 
 public class Word {
-    private String adress;
+    private String address;
     private String content;
 
     public Word() {
-        content = null;
+        content = "";
     }
 
-    public Word(String adress, String content) {
-        this.adress = adress;
+    public Word(String address, String content) {
+        this.address = address;
         this.content = content;
     }
 
-    public String getAdress() {
-        return adress;
+    public String getAddress() {
+        return address;
     }
 
-    public void setAdress(String adress) {
-        this.adress = adress;
+    public void setAddress(String address) {
+        this.address = address;
     }
 
     public String getContent() {

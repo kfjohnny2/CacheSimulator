@@ -12,23 +12,23 @@ import java.util.List;
  * Created by johnnylee on 03/12/16.
  */
 
-public class Cache extends Memory{
+public class Cache extends Memory {
     private Line[] lines;
     private int lineAmount;
     private Config config;
     private int misses;
     private int hits;
 
-    public Cache(Config config, int blockAmount) {
-        super(blockAmount);
+    public Cache(Config config) {
+        super(config.getBlockSize());
         this.config = config;
         this.lineAmount = config.getCacheLineSize();
         lines = new Line[lineAmount];
     }
 
-    public String read(int cacheAdr, int wordAdr) {
-        int blockPos = wordAdr / config.getBlockSize();
-        int wordPos = wordAdr % config.getBlockSize();
+    public String read(int cacheAddress, int wordAddress) {
+        int blockPos = wordAddress / config.getBlockSize();
+        int wordPos = wordAddress % config.getBlockSize();
         int linePos = -1;
 
         if (config.getMappingType() == 1) {
@@ -36,19 +36,19 @@ public class Cache extends Memory{
         }
 
         if (config.getMappingType() == 2) {
-            linePos = cacheAdr;
+            linePos = cacheAddress;
         }
 
         if (config.getMappingType() == 3) {
-            linePos = cacheAdr;
+            linePos = cacheAddress;
         }
 
         return String.valueOf(lines[linePos].getBlock().getWordAtPosition(wordPos).getContent());
     }
 
-    public void write(int cacheAdr, int wordAdr, String value) {
-        int blockPos = wordAdr / config.getBlockSize();
-        int wordPos = wordAdr % config.getBlockSize();
+    public void write(int cacheAddress, int wordAddress, String value) {
+        int blockPos = wordAddress / config.getBlockSize();
+        int wordPos = wordAddress % config.getBlockSize();
         int linePos = -1;
 
         if (config.getMappingType() == 1) {
@@ -56,67 +56,54 @@ public class Cache extends Memory{
         }
 
         if (config.getMappingType() == 2) {
-            linePos = cacheAdr;
+            linePos = cacheAddress;
         }
 
         if (config.getMappingType() == 3) {
-            linePos = cacheAdr;
+            linePos = cacheAddress;
         }
 
-        // Criar linha, se não tiver sido criada.
         if (lines[linePos] == null) {
             lines[linePos] = new Line(config);
         }
 
-        // Criar bloco, se não tiver sido criado.
         if (lines[linePos].getBlock() == null) {
             lines[linePos].setBlock(new Block(config));
         }
 
-        // Criar Word[], se não tiver sido criada.
         if (lines[linePos].getBlock().getWords() == null) {
             lines[linePos].getBlock().setWords(new Word[config.getBlockSize()]);
         }
 
-        // Criar Word, se não tiver sido criada.
         if (lines[linePos].getBlock().getWords()[wordPos] == null) {
             lines[linePos].getBlock().getWords()[wordPos] = new Word();
         }
 
-        // Escrever Word na cache.
         lines[linePos].getBlock().getWordAtPosition(wordPos).setContent(value);
     }
 
     public String show() {
-        StringBuilder sb = new StringBuilder("\n\n::: Memória cache::: ");
-        sb.append("\nPosição na cache:   ");
+        StringBuilder sb = new StringBuilder("\n\nCache Memory");
+        sb.append("\nPosition in cache:   ");
         for (int i = 0; i < lines.length; i++) {
             sb.append(i + " ");
         }
 
-        sb.append("\nLinhas na cache:    ");
+        sb.append("\nCache lines:{    ");
 
         for (Line l : lines) {
             if (l == null) {
-                sb.append("n ");
+                sb.append("[] ");
             } else {
-                sb.append("" + l.getTag() + " ");
+                sb.append("[" + l.getTag() + "] ");
             }
         }
-        List<String> tags = new ArrayList<>();
-        for (Line l : lines) {
-            if (l == null) {
-                sb.append("n ");
-            } else {
-                sb.append(l.getTag() + " ");
-            }
-        }
+        sb.append("}");
         return sb.toString();
     }
 
-    public int findOnCache(int wordAdr) {
+    public int find(int wordAdr) {
         int blockPos = wordAdr / config.getBlockSize();
-        int wordPos = wordAdr % config.getBlockSize();
         int linePos = -1;
 
         if (config.getMappingType() == 1) {
@@ -175,19 +162,20 @@ public class Cache extends Memory{
         this.lineAmount = lineAmount;
     }
 
-    public Line getLineAtPosition(int pos){
+    public Line getLineAtPosition(int pos) {
         Line line;
-        if(pos < getBlockAmount() && pos > 0)
+        if (pos < getBlockAmount() && pos > 0)
             line = this.lines[pos];
         else
             line = null;
         return line;
     }
-    public void incrementHits() {
+
+    public void cacheHit() {
         hits++;
     }
 
-    public void incrementMisses() {
+    public void cacheMiss() {
         misses++;
     }
 
@@ -214,5 +202,13 @@ public class Cache extends Memory{
             }
         }
         return -1;
+    }
+
+    public Config getConfig() {
+        return config;
+    }
+
+    public void setConfig(Config config) {
+        this.config = config;
     }
 }
