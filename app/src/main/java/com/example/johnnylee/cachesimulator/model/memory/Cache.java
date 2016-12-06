@@ -24,6 +24,9 @@ public class Cache extends Memory {
         this.config = config;
         this.lineAmount = config.getCacheLineSize();
         lines = new Line[lineAmount];
+//        for (int i = 0; i < lineAmount; i++) {
+//            lines[i] = new Line(config);
+//        }
     }
 
     public String read(int cacheAddress, int wordAddress) {
@@ -43,7 +46,10 @@ public class Cache extends Memory {
             linePos = cacheAddress;
         }
 
-        return String.valueOf(lines[linePos].getBlock().getWordAtPosition(wordPos).getContent());
+        if(lines[linePos] != null){
+            return String.valueOf(lines[linePos].getBlock().getWordAtPosition(wordPos).getContent());
+        }
+        return "Null";
     }
 
     public void write(int cacheAddress, int wordAddress, String value) {
@@ -163,12 +169,7 @@ public class Cache extends Memory {
     }
 
     public Line getLineAtPosition(int pos) {
-        Line line;
-        if (pos < getBlockAmount() && pos > 0)
-            line = this.lines[pos];
-        else
-            line = null;
-        return line;
+        return this.lines[pos];
     }
 
     public void cacheHit() {

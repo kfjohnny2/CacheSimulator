@@ -30,11 +30,11 @@ public class Wrapper {
             cache.cacheHit();
             if (config.getWritingType() == 1) {
                 cache.write(cacheAddress, write.getAddress(), write.getValue());
-                main.write(write.getAddress(), write.getValue());
             }
 
             if (config.getWritingType() == 2) {
                 cache.write(cacheAddress, write.getAddress(), write.getValue());
+                main.write(write.getAddress(), write.getValue());
             }
         } else {
             cache.cacheMiss();
@@ -42,12 +42,12 @@ public class Wrapper {
             if (config.getWritingType() == 1) {
                 cacheAddress = moveBlockToCache(write.getAddress());
                 cache.write(cacheAddress, write.getAddress(), write.getValue());
-                main.write(write.getAddress(), write.getValue());
             }
 
             if (config.getWritingType() == 2) {
                 cacheAddress = moveBlockToCache(write.getAddress());
                 cache.write(cacheAddress, write.getAddress(), write.getValue());
+                main.write(write.getAddress(), write.getValue());
             }
         }
     }
@@ -115,7 +115,7 @@ public class Wrapper {
             cache.getLineAtPosition(linePos).setBlock(new Block(config));
         }
 
-        if (cache.getConfig().getWritingType() == 2) {
+        if (cache.getConfig().getWritingType() == 1) {
 
             int oldPos = cache.getLines()[linePos].getTag();
 
